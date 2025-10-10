@@ -1,0 +1,11 @@
+{
+  "name": "guesty-workspace",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "pnpm -w -r build",
+    "dev": "pnpm -w -r dev"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@guesty/remote-i18n",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "echo \"No build configured\""
+  }
+}
