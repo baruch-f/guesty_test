@@ -1,9 +1,11 @@
 {
-  "name": "@guesty/shared",
-  "version": "0.1.0",
+  "name": "@guesty/remote-statistic",
+  "version": "0.0.0",
   "private": true,
-  "main": "src/index.tsx",
-  "types": "src/index.tsx",
+  "main": "dist/index.js",
+  "dependencies": {
+    "@guesty/shared": "*"
+  },
   "peerDependencies": {
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
@@ -14,19 +16,20 @@
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
     "babel-loader": "^9.2.1",
+    "css-loader": "^7.1.2",
+    "html-webpack-plugin": "^5.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tailwindcss": "^3.4.0",
-    "postcss": "^8.4.0",
+    "style-loader": "^4.0.0",
     "postcss-loader": "^7.3.3",
-    "autoprefixer": "^10.4.0",
     "typescript": "^5.3.3",
     "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18"
+    "@types/react-dom": "^18.2.18",
+    "webpack": "^5.95.0",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
-    "lint": "echo 'linting shared package...'",
-    "build": "tsc -b",
-    "type-check": "tsc --noEmit"
+    "build": "echo \"No build configured\""
   }
 }

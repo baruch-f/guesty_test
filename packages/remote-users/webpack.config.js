@@ -6,9 +6,12 @@ module.exports = {
   entry: './src/index.tsx',
   mode: 'development',
   devServer: {
-    port: 3000,
+    port: 3001,
     hot: true,
     historyApiFallback: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -46,22 +49,21 @@ module.exports = {
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: 'host',
+      name: 'remoteUsers',
       filename: 'remoteEntry.js',
-      remotes: {
-        remoteUsers: 'remoteUsers@http://localhost:3001/remoteEntry.js',
-        remoteStatistic: 'remoteStatistic@http://localhost:3002/remoteEntry.js',
+      exposes: {
+        './UsersApp': './src/UsersApp',
       },
       shared: {
         react: {
           singleton: true,
           requiredVersion: '^18.3.1',
-          eager: true,
+          eager: false,
         },
         'react-dom': {
           singleton: true,
           requiredVersion: '^18.3.1',
-          eager: true,
+          eager: false,
         },
         'react-i18next': {
           singleton: true,

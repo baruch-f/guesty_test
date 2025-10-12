@@ -4,8 +4,33 @@
   "workspaces": [
     "packages/*"
   ],
+  "devDependencies": {
+    "typescript": "^5.3.3",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18"
+  },
   "scripts": {
-    "build": "pnpm -w -r build",
-    "dev": "pnpm -w -r dev"
-  }
+    "dev": "npm run dev --workspaces",
+    "build": "npm run build --workspaces",
+    "lint": "npm run lint --workspaces",
+    "dev:host": "npm run dev --workspace @guesty/host",
+    "dev:remote-users": "npm run dev --workspace @guesty/remote-users",
+    "build:host": "npm run build --workspace @guesty/host",
+    "build:remote-users": "npm run build --workspace @guesty/remote-users",
+    "build:remote-statistic": "npm run build --workspace @guesty/remote-statistic",
+    "lint:host": "npm run lint --workspace @guesty/host",
+    "lint:remote-users": "npm run lint --workspace @guesty/remote-users",
+    "lint:remote-statistic": "npm run lint --workspace @guesty/remote-statistic",
+    "lint:shared": "npm run lint --workspace @guesty/shared",
+    "type-check": "npm run type-check --workspaces --if-present"
+  },
+  "version": "1.0.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }

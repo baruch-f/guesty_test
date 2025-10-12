@@ -6,9 +6,12 @@ module.exports = {
   entry: './src/index.tsx',
   mode: 'development',
   devServer: {
-    port: 3000,
+    port: 3002,
     hot: true,
     historyApiFallback: true,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+    },
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -21,24 +24,24 @@ module.exports = {
   },
   module: {
     rules: [
-      {
-        test: /\.(ts|tsx|js|jsx)$/,
-        include: [
-          path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, '../shared/src'),
-        ],
-        use: {
-          loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              ['@babel/preset-react', { runtime: 'automatic' }],
-              '@babel/preset-typescript'
-            ]
-          }
-        },
+    {
+      test: /\.(ts|tsx|js|jsx)$/,
+      include: [
+        path.resolve(__dirname, 'src'),
+        path.resolve(__dirname, '../shared/src'),
+      ],
+      use: {
+        loader: 'babel-loader',
+        options: {
+          presets: [
+            '@babel/preset-env',
+            ['@babel/preset-react', { runtime: 'automatic' }],
+            '@babel/preset-typescript'
+          ]
+        }
       },
-      {
+    },
+    {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
@@ -46,22 +49,21 @@ module.exports = {
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: 'host',
+      name: 'remoteStatistic',
       filename: 'remoteEntry.js',
-      remotes: {
-        remoteUsers: 'remoteUsers@http://localhost:3001/remoteEntry.js',
-        remoteStatistic: 'remoteStatistic@http://localhost:3002/remoteEntry.js',
+      exposes: {
+        './StatisticApp': './src/StatisticApp',
       },
       shared: {
         react: {
           singleton: true,
           requiredVersion: '^18.3.1',
-          eager: true,
+          eager: false,
         },
         'react-dom': {
           singleton: true,
           requiredVersion: '^18.3.1',
-          eager: true,
+          eager: false,
         },
         'react-i18next': {
           singleton: true,
