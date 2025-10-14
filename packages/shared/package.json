@@ -8,25 +8,23 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0"
   },
+  "dependencies": {
+    "clsx": "^2.1.1"
+  },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.4",
-    "@babel/preset-react": "^7.24.7",
-    "@babel/preset-typescript": "^7.24.7",
-    "babel-loader": "^9.2.1",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "postcss-cli": "^11.0.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "tailwindcss": "^3.4.0",
-    "postcss": "^8.4.0",
-    "postcss-loader": "^7.3.3",
-    "autoprefixer": "^10.4.0",
-    "typescript": "^5.3.3",
-    "@types/react": "^18.2.45",
-    "@types/react-dom": "^18.2.18"
+    "typescript": "^5.3.3"
   },
   "scripts": {
-    "lint": "echo 'linting shared package...'",
-    "build": "tsc -b",
-    "type-check": "tsc --noEmit"
+    "build": "npm run build:styles && npm run build:ts",
+    "build:styles": "postcss src/styles.css -o dist/styles.css",
+    "build:ts": "tsc"
   }
 }

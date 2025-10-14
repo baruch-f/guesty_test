@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
-import { Button, Card } from '@guesty/shared';
+import { Button, Card } from '@guesty/shared/dist';
 
 const App: React.FC = () => {
   return (

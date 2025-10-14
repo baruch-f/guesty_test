@@ -1,3 +1,34 @@
+/* packages/shared/src/styles.css 322 */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-neutral-50 text-neutral-900 font-sans antialiased;
+  }
+
+  h1, h2, h3 {
+    @apply font-semibold text-neutral-900;
+  }
+
+  a {
+    @apply text-brand-600 hover:text-brand-700 transition-colors;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-transparent
+           px-4 py-2 font-medium shadow-soft transition-all duration-150 bg-brand-500
+           focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2;
+  }
+
+  .btn--primary {
+    @apply bg-brand-500 text-white hover:bg-brand-600 active:bg-brand-700;
+  }
+
+  .btn--secondary {
+    @apply bg-white text-brand-600 border-brand-200 hover:bg-brand-50 active:bg-brand-100;
+  }
+}

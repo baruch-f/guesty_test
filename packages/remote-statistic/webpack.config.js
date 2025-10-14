@@ -28,7 +28,7 @@ module.exports = {
       test: /\.(ts|tsx|js|jsx)$/,
       include: [
         path.resolve(__dirname, 'src'),
-        path.resolve(__dirname, '../shared/src'),
+        path.resolve(__dirname, '../shared/dist/src'),
       ],
       use: {
         loader: 'babel-loader',

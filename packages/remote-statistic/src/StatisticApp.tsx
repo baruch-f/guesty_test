@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Card } from '@guesty/shared';
+import { Button, Card } from '@guesty/shared/dist';
 
 const StatisticApp: React.FC = () => {
   return (
