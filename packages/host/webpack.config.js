@@ -1,10 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
+const Dotenv = require('dotenv-webpack');
+
+const isProduction = process.env.NODE_ENV === 'production';
+const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
 module.exports = {
   entry: './src/index.tsx',
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   devServer: {
     port: 3000,
     hot: true,
@@ -12,9 +16,11 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[contenthash].js',
+    filename: isProduction ? '[name].[contenthash].js' : '[name].js',
     clean: true,
-    publicPath: 'auto',
+    publicPath: isProduction 
+      ? `https://${cloudfrontDomain}/host/` 
+      : 'auto',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
@@ -27,31 +33,29 @@ module.exports = {
           path.resolve(__dirname, 'src'),
           path.resolve(__dirname, '../shared/dist/src'),
         ],
+        exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
-          options: {
-            presets: [
-              '@babel/preset-env',
-              ['@babel/preset-react', { runtime: 'automatic' }],
-              '@babel/preset-typescript'
-            ]
-          }
         },
       },
       {
         test: /\.css$/,
-        include: [path.resolve(__dirname, '../shared/dist')],
-        use: ['style-loader', 'css-loader'],
+        use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
     ],
   },
   plugins: [
+    new Dotenv({path: '../../.env'}),
     new ModuleFederationPlugin({
       name: 'host',
       filename: 'remoteEntry.js',
       remotes: {
-        remoteUsers: 'remoteUsers@http://localhost:3001/remoteEntry.js',
-        remoteStatistic: 'remoteStatistic@http://localhost:3002/remoteEntry.js',
+        remoteUsers: isProduction
+          ? `remoteUsers@https://${cloudfrontDomain}/remote-users/remoteEntry.js`
+          : 'remoteUsers@http://localhost:3001/remoteEntry.js',
+        remoteStatistic: isProduction
+          ? `remoteStatistic@https://${cloudfrontDomain}/remote-statistic/remoteEntry.js`
+          : 'remoteStatistic@http://localhost:3002/remoteEntry.js',
       },
       shared: {
         react: {

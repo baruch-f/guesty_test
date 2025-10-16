@@ -1,10 +1,14 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const { ModuleFederationPlugin } = require('webpack').container;
+const Dotenv = require('dotenv-webpack');
+
+const isProduction = process.env.NODE_ENV === 'production';
+const cloudfrontDomain = process.env.CLOUDFRONT_DOMAIN;
 
 module.exports = {
   entry: './src/index.tsx',
-  mode: 'development',
+  mode: isProduction ? 'production' : 'development',
   devServer: {
     port: 3002,
     hot: true,
@@ -15,39 +19,42 @@ module.exports = {
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: '[name].[contenthash].js',
+    filename: isProduction ? '[name].[contenthash].js' : '[name].[contenthash].js',
     clean: true,
-    publicPath: 'auto',
+    publicPath: isProduction
+      ? `https://${cloudfrontDomain}/remote-statistic/`
+      : 'auto',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx'],
   },
   module: {
     rules: [
-    {
-      test: /\.(ts|tsx|js|jsx)$/,
-      include: [
-        path.resolve(__dirname, 'src'),
-        path.resolve(__dirname, '../shared/dist/src'),
-      ],
-      use: {
-        loader: 'babel-loader',
-        options: {
-          presets: [
-            '@babel/preset-env',
-            ['@babel/preset-react', { runtime: 'automatic' }],
-            '@babel/preset-typescript'
-          ]
-        }
+      {
+        test: /\.(ts|tsx|js|jsx)$/,
+        include: [
+          path.resolve(__dirname, 'src'),
+          path.resolve(__dirname, '../shared/dist/src'),
+        ],
+        use: {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              ['@babel/preset-react', { runtime: 'automatic' }],
+              '@babel/preset-typescript'
+            ]
+          }
+        },
       },
-    },
-    {
+      {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
     ],
   },
   plugins: [
+    new Dotenv({ path: '../../.env' }),
     new ModuleFederationPlugin({
       name: 'remoteStatistic',
       filename: 'remoteEntry.js',

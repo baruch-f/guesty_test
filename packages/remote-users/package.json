@@ -31,7 +31,7 @@
     "webpack-dev-server": "^5.1.0"
   },
   "scripts": {
-    "build": "webpack --config webpack.config.js",
+    "build": "webpack --config webpack.config.js --mode production",
     "dev": "webpack serve --config webpack.config.js --mode development",
     "type-check": "tsc --noEmit"
   }
