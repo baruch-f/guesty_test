@@ -1,3 +1,20 @@
+# Environment
+.env
+.env.local
+.env.production
+.env.staging
+
+# Build artifacts
 node_modules
-dist
 packages/**/dist
+tmp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
