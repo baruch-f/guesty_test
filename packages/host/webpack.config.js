@@ -29,10 +29,6 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx|js|jsx)$/,
-        include: [
-          path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, '../shared/dist/src'),
-        ],
         exclude: /node_modules/,
         use: {
           loader: 'babel-loader',
@@ -45,7 +41,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new Dotenv({path: '../../.env'}),
+    new Dotenv({ignoreStub: true}),
     new ModuleFederationPlugin({
       name: 'host',
       filename: 'remoteEntry.js',
