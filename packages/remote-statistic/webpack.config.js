@@ -32,10 +32,6 @@ module.exports = {
     rules: [
       {
         test: /\.(ts|tsx|js|jsx)$/,
-        include: [
-          path.resolve(__dirname, 'src'),
-          path.resolve(__dirname, '../shared/dist/src'),
-        ],
         use: {
           loader: 'babel-loader',
           options: {
@@ -54,7 +50,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new Dotenv({ path: '../../.env' }),
+    new Dotenv({ ignoreStub: true }),
     new ModuleFederationPlugin({
       name: 'remoteStatistic',
       filename: 'remoteEntry.js',
