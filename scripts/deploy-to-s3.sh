@@ -13,47 +13,76 @@ if [ -z "$BUCKET_NAME" ] || [ -z "$CLOUDFRONT_ID" ] || [ -z "$CLOUDFRONT_DOMAIN"
   exit 1
 fi
 
-echo "📦 Building all packages with NODE_ENV=$NODE_ENV..."
-npm run build
+# Опциональный параметр: какой пакет деплоить (host, remote-users, remote-statistic, all)
+PACKAGE=${1:-all}
 
-echo "☁️  Uploading host to S3..."
-aws s3 sync packages/host/dist s3://$BUCKET_NAME/host/ \
-  --delete \
-  --cache-control "public, max-age=31536000, immutable" \
-  --exclude "*.html"
+echo "📦 Building packages for deployment ($PACKAGE)..."
 
-aws s3 cp packages/host/dist/index.html s3://$BUCKET_NAME/host/index.html \
-  --cache-control "public, max-age=0, must-revalidate" \
-  --content-type "text/html"
+# Функция для деплоя отдельного пакета
+deploy_package() {
+  local PACKAGE_NAME=$1
+  local PACKAGE_PATH="packages/$PACKAGE_NAME/dist"
+  
+  if [ ! -d "$PACKAGE_PATH" ]; then
+    echo "⚠️  Skipping $PACKAGE_NAME - dist folder not found"
+    return
+  fi
+  
+  echo "☁️  Uploading $PACKAGE_NAME to S3..."
+  
+  # Загружаем JS/CSS файлы с contenthash - immutable cache
+  aws s3 sync "$PACKAGE_PATH" "s3://$BUCKET_NAME/$PACKAGE_NAME/" \
+    --delete \
+    --cache-control "public, max-age=31536000, immutable" \
+    --exclude "*.html" \
+    --exclude "remoteEntry.js"
+  
+  # Загружаем remoteEntry.js с коротким кешем (точка входа Module Federation)
+  if [ -f "$PACKAGE_PATH/remoteEntry.js" ]; then
+    aws s3 cp "$PACKAGE_PATH/remoteEntry.js" "s3://$BUCKET_NAME/$PACKAGE_NAME/remoteEntry.js" \
+      --cache-control "public, max-age=300, must-revalidate" \
+      --content-type "application/javascript"
+  fi
+  
+  # Загружаем HTML с коротким кешем
+  if [ -f "$PACKAGE_PATH/index.html" ]; then
+    aws s3 cp "$PACKAGE_PATH/index.html" "s3://$BUCKET_NAME/$PACKAGE_NAME/index.html" \
+      --cache-control "public, max-age=0, must-revalidate" \
+      --content-type "text/html"
+  fi
+  
+  echo "✅ $PACKAGE_NAME uploaded"
+}
 
-echo "☁️  Uploading remote-users to S3..."
-aws s3 sync packages/remote-users/dist s3://$BUCKET_NAME/remote-users/ \
-  --delete \
-  --cache-control "public, max-age=31536000, immutable" \
-  --exclude "*.html"
-
-if [ -f packages/remote-users/dist/index.html ]; then
-  aws s3 cp packages/remote-users/dist/index.html s3://$BUCKET_NAME/remote-users/index.html \
-    --cache-control "public, max-age=0, must-revalidate" \
-    --content-type "text/html"
+# Деплоим нужные пакеты
+if [ "$PACKAGE" = "all" ]; then
+  npm run build
+  deploy_package "host"
+  deploy_package "remote-users"
+  deploy_package "remote-statistic"
+  INVALIDATION_PATHS="/host/index.html /host/remoteEntry.js /remote-users/remoteEntry.js /remote-statistic/remoteEntry.js"
+elif [ "$PACKAGE" = "host" ]; then
+  npm run build:host
+  deploy_package "host"
+  INVALIDATION_PATHS="/host/index.html /host/remoteEntry.js"
+elif [ "$PACKAGE" = "remote-users" ]; then
+  npm run build:remote-users
+  deploy_package "remote-users"
+  INVALIDATION_PATHS="/remote-users/remoteEntry.js"
+elif [ "$PACKAGE" = "remote-statistic" ]; then
+  npm run build:remote-statistic
+  deploy_package "remote-statistic"
+  INVALIDATION_PATHS="/remote-statistic/remoteEntry.js"
+else
+  echo "❌ Unknown package: $PACKAGE"
+  echo "Usage: $0 [host|remote-users|remote-statistic|all]"
+  exit 1
 fi
 
-echo "☁️  Uploading remote-statistic to S3..."
-aws s3 sync packages/remote-statistic/dist s3://$BUCKET_NAME/remote-statistic/ \
-  --delete \
-  --cache-control "public, max-age=31536000, immutable" \
-  --exclude "*.html"
-
-if [ -f packages/remote-statistic/dist/index.html ]; then
-  aws s3 cp packages/remote-statistic/dist/index.html s3://$BUCKET_NAME/remote-statistic/index.html \
-    --cache-control "public, max-age=0, must-revalidate" \
-    --content-type "text/html"
-fi
-
-echo "🔄 Creating CloudFront invalidation..."
+echo "🔄 Creating CloudFront invalidation for: $INVALIDATION_PATHS"
 aws cloudfront create-invalidation \
   --distribution-id $CLOUDFRONT_ID \
-  --paths "/host/*" "/remote-users/*" "/remote-statistic/*"
+  --paths $INVALIDATION_PATHS
 
 echo ""
 echo "✅ Deploy complete!"

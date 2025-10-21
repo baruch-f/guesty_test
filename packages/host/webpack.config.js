@@ -1,6 +1,7 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const { ModuleFederationPlugin } = require('webpack').container;
+const { ModuleFederationPlugin } = webpack.container;
 const Dotenv = require('dotenv-webpack');
 
 const isProduction = process.env.NODE_ENV === 'production';
@@ -13,6 +14,12 @@ module.exports = {
     port: 3000,
     hot: true,
     historyApiFallback: true,
+    static: [
+      {
+        directory: path.join(__dirname, '../../locales-dist'),
+        publicPath: '/locales-dist',
+      },
+    ],
   },
   output: {
     path: path.resolve(__dirname, 'dist'),
@@ -23,7 +30,7 @@ module.exports = {
       : 'auto',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.jsx'],
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
   },
   module: {
     rules: [
@@ -38,13 +45,25 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader', 'postcss-loader'],
       },
+      {
+        test: /\.json$/,
+        type: 'json',
+      },
     ],
   },
   plugins: [
-    new Dotenv({ignoreStub: true}),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(isProduction ? 'production' : 'development'),
+      'process.env.CLOUDFRONT_DOMAIN': JSON.stringify(cloudfrontDomain || ''),
+    }),
+    new Dotenv({ ignoreStub: true }),
     new ModuleFederationPlugin({
       name: 'host',
       filename: 'remoteEntry.js',
+      exposes: {
+        './i18n': './src/i18n/index.ts',
+        './useRemoteTranslations': './src/hooks/useRemoteTranslations.ts',
+      },
       remotes: {
         remoteUsers: isProduction
           ? `remoteUsers@https://${cloudfrontDomain}/remote-users/remoteEntry.js`
@@ -64,13 +83,20 @@ module.exports = {
           requiredVersion: '^18.3.1',
           eager: true,
         },
+        'react-router-dom': {
+          singleton: true,
+          requiredVersion: '^6.26.2',
+          eager: true,
+        },
         'react-i18next': {
           singleton: true,
           requiredVersion: '^14.0.1',
+          eager: true,
         },
         i18next: {
           singleton: true,
           requiredVersion: '^23.10.1',
+          eager: true,
         },
       },
     }),
