@@ -57,6 +57,11 @@ module.exports = {
       exposes: {
         './StatisticApp': './src/StatisticApp',
       },
+      remotes: {
+        host: isProduction
+          ? `host@https://${cloudfrontDomain}/host/remoteEntry.js`
+          : 'host@http://localhost:3000/remoteEntry.js',
+      },
       shared: {
         react: {
           singleton: true,

@@ -1,10 +1,8 @@
-import { Button, Card } from '@guesty/shared/dist';
-import { Component, ErrorInfo, ReactNode } from 'react';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
-  fullScreen?: boolean; // Новый prop для контроля layout
 }
 
 interface State {
@@ -23,97 +21,49 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught:', error, errorInfo);
-  }
-
-  handleReset = () => {
-    this.setState({ hasError: false, error: null });
-    // Не перезагружаем всю страницу, просто сбрасываем состояние
-  };
-
-  isModuleLoadError(error: Error | null): boolean {
-    if (!error) return false;
-    const message = error.message || '';
-    return (
-      message.includes('Loading script failed') ||
-      message.includes('Element type is invalid') ||
-      message.includes('Lazy element type') ||
-      message.includes('remoteEntry.js') ||
-      message.includes('ChunkLoadError') ||
-      error.name === 'ScriptExternalLoadError'
-    );
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
   }
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
-
-      const isModuleError = this.isModuleLoadError(this.state.error);
-      const wrapperClass = this.props.fullScreen 
-        ? "min-h-screen flex items-center justify-center bg-gray-50 p-4"
-        : "flex items-center justify-center p-4";
-
-      return (
-        <div className={wrapperClass}>
-          <Card 
-            title={isModuleError ? "⚠️ Remote Module Unavailable" : "Oops! Something went wrong"} 
-            className="max-w-md"
-          >
-            {isModuleError ? (
-              <>
-                <p className="text-gray-700 mb-2 font-semibold">
-                  Failed to load remote module
-                </p>
-                <p className="text-sm text-gray-600 mb-4">
-                  The remote service you're trying to access is currently unavailable. 
-                  This could be because:
-                </p>
-                <ul className="text-sm text-gray-600 mb-4 list-disc list-inside space-y-1">
-                  <li>The remote service is not running</li>
-                  <li>Network connectivity issues</li>
-                  <li>The service is being deployed</li>
-                </ul>
-                <p className="text-xs text-gray-500 mb-4">
-                  Error: {this.state.error?.message}
-                </p>
-                <div className="space-x-2">
-                  <Button onClick={this.handleReset}>Try Again</Button>
-                  <Button 
-                    variant="secondary" 
-                    onClick={() => window.location.href = '/'}
-                  >
-                    Go Home
-                  </Button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-gray-600 mb-4">
-                  {this.state.error?.message || 'An unexpected error occurred'}
-                </p>
-                <p className="text-sm text-gray-500 mb-4">
-                  Please try again. If the problem persists, contact support.
-                </p>
-                <div className="space-x-2">
-                  <Button onClick={this.handleReset}>Try Again</Button>
-                  <Button 
-                    variant="secondary" 
-                    onClick={() => window.location.href = '/'}
-                  >
-                    Go Home
-                  </Button>
-                </div>
-              </>
-            )}
-          </Card>
-        </div>
-      );
+      return <ErrorFallback error={this.state.error} onReset={() => this.setState({ hasError: false, error: null })} />;
     }
 
     return this.props.children;
   }
 }
+
+const ErrorFallback: React.FC<{ error: Error | null; onReset: () => void }> = ({ error, onReset }) => {
+  const { t } = useTranslation('host');
+
+  return (
+    <div className="min-h-[400px] flex items-center justify-center">
+      <div className="text-center space-y-4 p-8 bg-red-50 rounded-lg max-w-2xl">
+        <div className="text-6xl">⚠️</div>
+        <h2 className="text-2xl font-bold text-red-800">{t('error_boundary.title')}</h2>
+        <p className="text-red-600">{t('error_boundary.description')}</p>
+        {error && (
+          <pre className="text-left text-sm bg-red-100 p-4 rounded overflow-auto max-h-40">
+            {error.message}
+          </pre>
+        )}
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={onReset}
+            className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-colors"
+          >
+            {t('error_boundary.retry_button')}
+          </button>
+          <button
+            onClick={() => window.location.href = '/'}
+            className="px-6 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition-colors"
+          >
+            {t('error_boundary.home_button')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default ErrorBoundary;

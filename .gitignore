@@ -5,9 +5,18 @@
 .env.staging
 
 # Build artifacts
-node_modules
+node_modules/
 packages/**/dist
-tmp
+dist/
+build/
+
+# Temporary files
+tmp/
+
+# Translation build artifacts
+locales-dist/
+packages/*/locales/
+.i18next-scanner.tmp.js
 
 # OS
 .DS_Store

@@ -8,12 +8,20 @@
     "@types/node": "^20.10.0",
     "@types/react": "^18.2.45",
     "@types/react-dom": "^18.2.18",
+    "concurrently": "^9.2.1",
     "dotenv-webpack": "^8.1.1",
+    "env-paths": "^3.0.0",
+    "i18next-scanner": "^4.6.0",
     "typescript": "^5.3.3"
   },
   "scripts": {
-    "dev": "concurrently \"npm:dev:*\" --kill-others",
-    "build": "npm run build:shared && npm run build:remote-users && npm run build:remote-statistic && npm run build:host",
+    "dev": "npm run build:shared && npm run i18n:translate && concurrently \"npm:dev:*\" --kill-others",
+    "build": "npm run build:shared && npm run i18n:translate && npm run build:shared && npm run build:remote-users && npm run build:remote-statistic && npm run build:host",
+    "i18n:extract": "node scripts/extract-translations.js",
+    "i18n:translate": "node scripts/translate-and-prepare.js",
+    "deploy:app": "bash scripts/deploy-to-s3.sh",
+    "deploy:translations": "bash scripts/deploy-translations-to-s3.sh",
+    "deploy:all": "npm run build && npm run deploy:translations && npm run deploy:app",
     "lint": "npm run lint --workspaces",
     "dev:host": "npm run dev --workspace @guesty/host",
     "dev:remote-users": "npm run dev --workspace @guesty/remote-users",
@@ -26,7 +34,8 @@
     "lint:remote-users": "npm run lint --workspace @guesty/remote-users",
     "lint:remote-statistic": "npm run lint --workspace @guesty/remote-statistic",
     "lint:shared": "npm run lint --workspace @guesty/shared",
-    "type-check": "npm run type-check --workspaces --if-present"
+    "type-check": "npm run type-check --workspaces --if-present",
+    "clean": "rm -rf packages/*/dist packages/*/locales locales-dist node_modules/.cache"
   },
   "version": "1.0.0",
   "main": "index.js",
